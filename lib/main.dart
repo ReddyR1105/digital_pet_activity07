@@ -39,7 +39,42 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isPaused = false;
   Timer? hungerTimer;
   Timer? highMoodTimer;
+  Timer? _reactionTimer;
+  double _reactionScale = 1.0;
   final TextEditingController nameController = TextEditingController();
+
+  String get _moodLabel {
+    if (happiness < 30) return 'Unhappy';
+    if (happiness <= 70) return 'Neutral';
+    return 'Happy';
+  }
+
+  Color get _moodColor {
+    if (happiness < 30) return Colors.red;
+    if (happiness <= 70) return Colors.yellow;
+    return Colors.green;
+  }
+
+  String get _petMessage {
+    if (gameOver) return 'I need a rest.';
+    if (hasWon) return 'Best day ever!';
+    if (hunger > 80) return 'I’m starving!';
+    if (happiness <= 30) return 'Play with me?';
+    return 'Hi, I’m $petName!';
+  }
+
+  void _reactToCare() {
+    _reactionTimer?.cancel();
+    if (MediaQuery.of(context).disableAnimations) {
+      setState(() => _reactionScale = 1.0);
+      return;
+    }
+    setState(() => _reactionScale = 1.08);
+    _reactionTimer = Timer(const Duration(milliseconds: 250), () {
+      if (!mounted) return;
+      setState(() => _reactionScale = 1.0);
+    });
+  }
 
   @override
   void initState() {
@@ -59,6 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _feedPet() {
     if (isPaused || gameOver || hasWon) return;
+    _reactToCare();
     setState(() {
       hunger = _clampMeter(hunger - 10);
       if (hunger < 30) {
@@ -72,6 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _playWithPet() {
     if (isPaused || gameOver || hasWon) return;
+    _reactToCare();
     setState(() {
       happiness = _clampMeter(happiness + 10);
       hunger = _clampMeter(hunger + 5);
@@ -155,12 +192,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _resetGame() {
+    _reactionTimer?.cancel();
     hungerTimer?.cancel();
     hungerTimer = null;
     highMoodTimer?.cancel();
     highMoodTimer = null;
     setState(() {
       happiness = 50;
+      _reactionScale = 1.0;
       hunger = 50;
       gameOver = false;
       hasWon = false;
@@ -171,6 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
+    _reactionTimer?.cancel();
     hungerTimer?.cancel();
     highMoodTimer?.cancel();
     nameController.dispose();
@@ -179,6 +219,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    final animationDuration = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 250);
     final canCare = !isPaused && !gameOver && !hasWon;
     final status = gameOver
         ? 'GAME OVER'
@@ -205,12 +249,80 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             const SizedBox(height: 16),
             Text('Pet: $petName'),
+            const SizedBox(height: 12),
+            Center(
+              child: AnimatedScale(
+                scale: reduceMotion ? 1.0 : _reactionScale,
+                duration: animationDuration,
+                curve: Curves.easeInOut,
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(_moodColor, BlendMode.modulate),
+                  child: Image.asset(
+                    'assets/pet.png',
+                    width: 96,
+                    height: 96,
+                    fit: BoxFit.contain,
+                    semanticLabel: '$petName, feeling $_moodLabel',
+                    errorBuilder: (context, error, stackTrace) =>
+                        const SizedBox(
+                          width: 96,
+                          height: 96,
+                          child: Center(child: Text('Pet image unavailable')),
+                        ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                _petMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Chip(
+                backgroundColor: _moodColor,
+                label: Text(
+                  'Mood: $_moodLabel',
+                  style: const TextStyle(color: Colors.black),
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             Text('Happiness: $happiness'),
-            LinearProgressIndicator(value: happiness / 100),
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(
+                begin: happiness / 100,
+                end: happiness / 100,
+              ),
+              duration: animationDuration,
+              builder: (context, value, child) => LinearProgressIndicator(
+                value: value,
+                semanticsLabel: 'Happiness',
+                semanticsValue: '$happiness',
+              ),
+            ),
             const SizedBox(height: 16),
             Text('Hunger: $hunger'),
-            LinearProgressIndicator(value: hunger / 100),
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: hunger / 100, end: hunger / 100),
+              duration: animationDuration,
+              builder: (context, value, child) => LinearProgressIndicator(
+                value: value,
+                semanticsLabel: 'Hunger',
+                semanticsValue: '$hunger',
+              ),
+            ),
             const SizedBox(height: 16),
             Wrap(
               spacing: 8,
