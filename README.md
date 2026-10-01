@@ -31,6 +31,11 @@ Widget tests advance simulated time with the production durations unchanged.
 They cover naming, meter bounds, feeding thresholds, hunger ticks, win/loss,
 pause/resume, reset, and disposal with active timers.
 
+## Asset attribution
+
+Pet asset (`assets/pet.png`): Original procedural artwork created specifically
+for this Digital Pet project; no external copyrighted asset used.
+
 ## Review
 
 The initial main commit contains the existing Flutter starter. Team 1 changes

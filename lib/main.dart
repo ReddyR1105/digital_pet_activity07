@@ -309,7 +309,7 @@ class _MyHomePageState extends State<MyHomePage> {
               builder: (context, value, child) => LinearProgressIndicator(
                 value: value,
                 semanticsLabel: 'Happiness',
-                semanticsValue: '$happiness out of 100',
+                semanticsValue: '$happiness',
               ),
             ),
             const SizedBox(height: 16),
@@ -320,7 +320,7 @@ class _MyHomePageState extends State<MyHomePage> {
               builder: (context, value, child) => LinearProgressIndicator(
                 value: value,
                 semanticsLabel: 'Hunger',
-                semanticsValue: '$hunger out of 100',
+                semanticsValue: '$hunger',
               ),
             ),
             const SizedBox(height: 16),
