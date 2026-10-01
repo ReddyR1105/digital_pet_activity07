@@ -1,17 +1,37 @@
-# digital_pet
+# Digital Pet — Activity 07
 
-A new Flutter project.
+## Team 1: Care Systems
 
-## Getting Started
+Simple Flutter app using StatefulWidget, setState, Timer, and a
+TextEditingController. Team 2 personality and visual design are left for the
+teammate.
 
-This project is a starting point for a Flutter application.
+- Confirm a pet name; reset preserves the name.
+- Feed reduces hunger by 10. Resulting hunger below 30 costs 20 happiness;
+  otherwise feeding adds 10 happiness.
+- Play adds 10 happiness and 5 hunger. All meters stay between 0 and 100.
+- Hunger increases by 5 every 30 seconds. A tick already at 100 hunger costs
+  20 happiness; the tick that first reaches 100 does not.
+- Win by keeping happiness strictly above 80 for three continuous minutes.
+- Lose at 100 hunger and happiness at or below 10.
+- Pause stops care and both timers. Resume begins fresh timer intervals,
+  including a new three-minute win attempt.
+- Reset restores both meters to 50 and restarts play from any status.
 
-A few resources to get you started if this is your first Flutter project:
+## Run and check
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```sh
+flutter pub get
+flutter run
+flutter analyze
+flutter test
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Widget tests advance simulated time with the production durations unchanged.
+They cover naming, meter bounds, feeding thresholds, hunger ticks, win/loss,
+pause/resume, reset, and disposal with active timers.
+
+## Review
+
+The initial main commit contains the existing Flutter starter. Team 1 changes
+are on `team-1/care-systems` for teammate review before merging.
