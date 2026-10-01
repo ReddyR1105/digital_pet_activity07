@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 Future<void> tap(WidgetTester tester, String label, [int times = 1]) async {
   for (var i = 0; i < times; i++) {
-    await tester.tap(find.widgetWithText(ElevatedButton, label));
+    final button = find.widgetWithText(ElevatedButton, label);
+    await tester.ensureVisible(button);
+    await tester.tap(button);
     await tester.pump();
   }
 }
@@ -95,6 +97,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('YOU WIN!'), findsOneWidget);
     careDisabled(tester);
+    // Let the final meter animation finish before checking the frozen values.
+    await tester.pump(const Duration(milliseconds: 250));
     final before = tester
         .widgetList<LinearProgressIndicator>(
           find.byType(LinearProgressIndicator),
